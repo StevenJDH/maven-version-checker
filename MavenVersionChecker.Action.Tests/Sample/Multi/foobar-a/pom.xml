@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ This file is part of Maven Version Checker <https://github.com/StevenJDH/maven-version-checker>.
+ Copyright (C) 2024 Steven Jenkins De Haro.
+ 
+ Maven Version Checker is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Maven Version Checker is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Maven Version Checker.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>io.github.stevenjdh</groupId>
+        <artifactId>foobar-parent-pom</artifactId>
+        <version>1.0.0</version>
+    </parent>
+    
+    <artifactId>foobar-a</artifactId>
+    <packaging>jar</packaging>
+    
+    <name>Foobar :: A</name>
+    <description>A test pom module to scan with Maven Version Checker.</description>
+    
+    <properties>
+        <!-- Configuration -->
+        <start-class>${project.groupId}.foobara.ApiApplication</start-class>
+        <!-- Dependency Versions -->
+        <commons-csv.version>1.9.0</commons-csv.version>
+        <!-- Plugin Versions -->
+    </properties>
+    
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>${commons-csv.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.stevenjdh</groupId>
+            <artifactId>foobar-shared-library</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>       
+        <plugins>
+        </plugins>
+    </build>
+
+</project>

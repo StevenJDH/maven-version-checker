@@ -1,0 +1,41 @@
+{
+  "profiles": {
+    "Console (Single)": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "INPUT_LOCATION": "./../../../../MavenVersionChecker.Action.Tests/Sample/Single/pom.xml",
+        "GITHUB_OUTPUT": "./locals/output.txt",
+        "GITHUB_STEP_SUMMARY": "./locals/summary.txt"
+      }
+    },
+    "Console (Multi)": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "INPUT_LOCATION": "./../../../../MavenVersionChecker.Action.Tests/Sample/Multi/pom.xml",
+        "GITHUB_OUTPUT": "./locals/output.txt",
+        "GITHUB_STEP_SUMMARY": "./locals/summary.txt"
+      }
+    },
+    "ChaosConsole (Multi)": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Chaos",
+        "INPUT_LOCATION": "./../../../../MavenVersionChecker.Action.Tests/Sample/Multi/pom.xml",
+        "GITHUB_OUTPUT": "./locals/output.txt",
+        "GITHUB_STEP_SUMMARY": "./locals/summary.txt"
+      }
+    },
+    "Container": {
+      "commandName": "Docker (Multi)",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "INPUT_LOCATION": "./../../../../MavenVersionChecker.Action.Tests/Sample/Multi/pom.xml",
+        "GITHUB_OUTPUT": "./locals/output.txt",
+        "GITHUB_STEP_SUMMARY": "./locals/summary.txt"
+      }
+    }
+  },
+  "$schema": "http://json.schemastore.org/launchsettings.json"
+}

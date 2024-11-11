@@ -1,0 +1,44 @@
+# This file is part of Maven Version Checker <https://github.com/StevenJDH/maven-version-checker>.
+# Copyright (C) 2024 Steven Jenkins De Haro.
+#
+# Maven Version Checker is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Maven Version Checker is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Maven Version Checker.  If not, see <http://www.gnu.org/licenses/>.
+
+name: 'Maven Version Checker'
+description: 'A GitHub action that checks for any available updates for maven dependencies and plugins.'
+author: StevenJDH
+
+# See branding:
+# https://docs.github.com/actions/creating-actions/metadata-syntax-for-github-actions#branding
+branding:
+  icon: 'chevrons-up'
+  color: 'blue'
+
+inputs:
+  location:
+    description:
+      'Defines the location of the main pom.xml file for a maven project.'
+    required: false
+    default: './pom.xml'
+
+outputs:
+  has_updates:
+    description: 'Indicates whether or not artifact updates are available.'
+  number_of_updates:
+    description: 'Holds the number of artifact updates available.'
+  update_json:
+    description: 'A map of artifacts with updates in json format. Note: The parents field is maintained as an array so that processing can use the same code.'
+
+runs:
+  using: 'docker'
+  image: 'docker://ghcr.io/stevenjdh/maven-version-checker:1.0.0'
