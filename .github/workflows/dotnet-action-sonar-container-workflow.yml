@@ -1,0 +1,202 @@
+name: 'build'
+
+on:
+  push:
+    branches:
+    - main
+    paths-ignore:
+    - '*.md'
+    - '*.png'
+    tags:
+    - 'v?[0-9]+.[0-9]+.[0-9]+'
+  pull_request:
+    branches:
+    - main
+    paths-ignore:
+    - '*.md'
+    - '*.png'
+    types: [opened, synchronize, reopened] # https://docs.github.com/en/free-pro-team@latest/actions/reference/events-that-trigger-workflows#pull_request
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'The reason for running the workflow.'
+        required: true
+        default: 'Manual run'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    outputs:
+      mode: ${{ steps.release.outputs.mode }} 
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        # Disabling shallow clone is recommended for improving relevancy.
+        fetch-depth: 0
+
+    # Already installed on build agent.
+    # - name: Setup .NET
+    #   uses: actions/setup-dotnet@v4
+    #   with:
+    #     dotnet-version: 8.x
+
+    # Step needed to avoid issues with sonarscanner and preinstalled Java 11.
+    - name: Install Temurin OpenJDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: 17
+        distribution: 'temurin'
+        architecture: x64
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: ${{ runner.os }}-nuget
+
+    - name: Cache SonarCloud packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonar
+        restore-keys: ${{ runner.os }}-sonar
+
+    - name: Cache SonarCloud scanner
+      id: cache-sonar-scanner
+      uses: actions/cache@v4
+      with:
+        path: ~/.sonar/scanner
+        key: ${{ runner.os }}-sonar-scanner
+        restore-keys: ${{ runner.os }}-sonar-scanner
+
+    - name: Install SonarCloud scanner
+      if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        mkdir -p ~/.sonar/scanner
+        dotnet tool update dotnet-sonarscanner --tool-path ~/.sonar/scanner
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build, Test, and Analyze
+      # env:
+      #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any.
+      #   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        # ~/.sonar/scanner/dotnet-sonarscanner begin /k:StevenJDH_maven-version-checker /o:stevenjdh /d:sonar.token=$SONAR_TOKEN /d:sonar.host.url="https://sonarcloud.io" \
+        #     /d:sonar.cs.opencover.reportsPaths="**/TestResults/*/coverage.opencover.xml" /d:sonar.cs.vstest.reportsPaths="**/TestResults/*.trx" /d:sonar.language=cs \
+        #     /d:sonar.scanner.scanAll=false
+        dotnet build --configuration Debug --no-restore
+        dotnet test --configuration Debug --no-build --verbosity normal --collect:"XPlat Code Coverage" --logger trx -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+        # ~/.sonar/scanner/dotnet-sonarscanner end /d:sonar.token=$SONAR_TOKEN
+
+    - name: Set Release Mode
+      id: release
+      run: |
+        if [[ "${{ !contains(github.event_name, 'pull_request') }}" == true && ${{ startsWith(github.ref, 'refs/tags/') }} == true ]]; then
+          MODE=release
+        else
+          MODE=test
+        fi
+        echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+        echo "### Release mode set to: ${MODE^^} :rocket:" >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: repo-src
+        path: |
+          ${{ github.workspace }}
+          !.git/
+          !.github/
+          !*/bin/
+          !*/obj/
+          !*/Properties/
+          !*.md
+          !*/TestResults/
+        retention-days: 1
+
+  deploy_action:
+    name: Deploy Action for ${{ needs.build.outputs.mode == 'test' && 'Testing' || 'Release' }}
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    environment: ${{ needs.build.outputs.mode }}
+    needs: build
+
+    steps:
+    - name: Download Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: repo-src
+
+    - name: Generate Docker Metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        # List of container registry names to use for image tagging.
+        # Everything will be automatically set to lowercase.
+        images: |
+          ghcr.io/${{ github.repository }},enable=true
+        # Generates Docker tags based on the following events/attributes.
+        # latest tag set to true instead of {{is_default_branch}} because push is a conditional.
+        tags: |
+          type=ref,event=branch,enable=false
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
+          type=sha
+          type=raw,value=latest,enable=true
+
+    - name: Login to GHCR
+      if: ${{ needs.build.outputs.mode == 'release' }}
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build${{ needs.build.outputs.mode == 'test' && ' and Tag ' || ', Tag, and Push ' }}Image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: MavenVersionChecker.Action/Dockerfile
+        push: ${{ needs.build.outputs.mode == 'release' }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+    - name: Test Action Locally
+      if: ${{ needs.build.outputs.mode == 'test' }}
+      id: maven-artifacts
+      uses: ./MavenVersionChecker.Action/
+      with:
+        location: './MavenVersionChecker.Action.Tests/Sample/Multi/pom.xml'
+    
+    - name: Display Action Outputs
+      if: ${{ needs.build.outputs.mode == 'test' }}
+      env: ${{ fromJSON(steps.maven-artifacts.outputs.update_json) }}
+      run: |
+        echo "Action Outputs:"
+        echo "- [has_updates]: ${{ steps.maven-artifacts.outputs.has_updates }}"
+        echo "- [number_of_updates]: ${{ steps.maven-artifacts.outputs.number_of_updates }}"
+        echo "- [update_json]: ${{ steps.maven-artifacts.outputs.update_json }}"
+        echo ""
+        echo "Deserialized Update JSON:"
+        echo "- [parents]: $parents"
+        echo "- [dependencies]: $dependencies"
+        echo "- [plugins]: ${{ fromJSON(steps.maven-artifacts.outputs.update_json).plugins }}" # Alternative
+        echo ""
+
+        # One approach to processing an array type field using bash:
+        array=($(echo "$plugins" | jq -r '.[]'))
+        for element in "${array[@]}"; do
+            IFS=":" read -r groupId artifactId version <<< "$element"
+            echo "groupId: $groupId"
+            echo "artifactId: $artifactId"
+            echo -e "version: $version\n"
+        done

@@ -1,0 +1,25 @@
+name: action-release-tags
+
+on:
+  release:
+    types: [released, edited]
+
+jobs:
+  action-tagger:
+    name: action-tagger
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Disabling shallow clone ensures all commits 
+          # and tags are available at checkout.
+          fetch-depth: 0
+
+      - name: Tag Release
+        id: action-tagger
+        uses: stevenjdh/action-tagger@v1
+        with:
+          set-latest-tag: true
