@@ -1,5 +1,6 @@
 # GitHub Action: Maven Version Checker
 
+[![build](https://github.com/StevenJDH/maven-version-checker/actions/workflows/dotnet-action-sonar-container-workflow.yml/badge.svg?branch=main)](https://github.com/StevenJDH/maven-version-checker/actions/workflows/dotnet-action-sonar-container-workflow.yml)
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/StevenJDH/maven-version-checker?include_prereleases)
 [![Public workflows that use this action.](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fused-by.vercel.app%2Fapi%2Fgithub-actions%2Fused-by%3Faction%3DStevenJDH%2Fmaven-version-checker%26badge%3Dtrue)](https://github.com/search?o=desc&q=StevenJDH+maven-version-checker+language%3AYAML&s=&type=Code)
 ![Maintenance](https://img.shields.io/badge/yes-4FCA21?label=maintained&style=flat)
@@ -31,7 +32,7 @@ The following inputs are available:
 
 | Name                                         | Type     | Required | Default                      |  Description                                                       |
 |----------------------------------------------|----------|:--------:|:----------------------------:|--------------------------------------------------------------------|
-| <a name="location"></a>[location](#location) | `string` | `false`  | `./pom.xml`                  | Defines the location of the main pom.xml file for a maven project. |
+| <a name="location"></a>[location](#location) | `string` | `false`  | <code>.&#xFEFF;/&#xFEFF;pom.xml</code> | Defines the location of the main pom.xml file for a maven project. |
 
 ## Outputs
 The following outputs are available:
@@ -56,6 +57,12 @@ on:
     branches:
     - main
     types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'The reason for running the workflow.'
+        required: true
+        default: 'Manual run'
 
 jobs:
   build:
@@ -70,7 +77,6 @@ jobs:
         location: './pom.xml'
 
     - name: Display Action Outputs
-      env: ${{ fromJSON(steps.maven-artifacts.outputs.update_json) }}
       run: |
         echo "Action Outputs:"
         echo "- [has_updates]: ${{ steps.maven-artifacts.outputs.has_updates }}"
@@ -78,14 +84,13 @@ jobs:
         echo "- [update_json]: ${{ steps.maven-artifacts.outputs.update_json }}"
         echo ""
         echo "Deserialized Update JSON:"
-        echo "- [parents]: $parents"
-        echo "- [dependencies]: $dependencies"
-        echo "- [plugins]: ${{ fromJSON(steps.maven-artifacts.outputs.update_json).plugins }}" # Alternative
+        echo "- [parents][0]: ${{ fromJSON(steps.maven-artifacts.outputs.update_json).parents[0] }}"
+        echo "- [dependencies][0]: ${{ fromJSON(steps.maven-artifacts.outputs.update_json).dependencies[0] }}"
+        echo "- [plugins][0]: ${{ fromJSON(steps.maven-artifacts.outputs.update_json).plugins[0] }}"
         echo ""
         
-        # One approach to processing an array type field using bash:
-        array=($(echo "$plugins" | jq -r '.[]'))
-        for element in "${array[@]}"; do
+        echo "One approach to processing an array type field using bash:"
+        for element in ${{ join(fromJSON(steps.maven-artifacts.outputs.update_json).plugins, ' ') }}; do
             IFS=":" read -r groupId artifactId version <<< "$element"
             echo "groupId: $groupId"
             echo "artifactId: $artifactId"
