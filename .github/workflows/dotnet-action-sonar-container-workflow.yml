@@ -179,7 +179,6 @@ jobs:
     
     - name: Display Action Outputs
       if: ${{ needs.build.outputs.mode == 'test' }}
-      env: ${{ fromJSON(steps.maven-artifacts.outputs.update_json) }}
       run: |
         echo "Action Outputs:"
         echo "- [has_updates]: ${{ steps.maven-artifacts.outputs.has_updates }}"
@@ -187,14 +186,13 @@ jobs:
         echo "- [update_json]: ${{ steps.maven-artifacts.outputs.update_json }}"
         echo ""
         echo "Deserialized Update JSON:"
-        echo "- [parents]: $parents"
-        echo "- [dependencies]: $dependencies"
-        echo "- [plugins]: ${{ fromJSON(steps.maven-artifacts.outputs.update_json).plugins }}" # Alternative
+        echo "- [parents][0]: ${{ fromJSON(steps.maven-artifacts.outputs.update_json).parents[0] }}"
+        echo "- [dependencies][0]: ${{ fromJSON(steps.maven-artifacts.outputs.update_json).dependencies[0] }}"
+        echo "- [plugins][0]: ${{ fromJSON(steps.maven-artifacts.outputs.update_json).plugins[0] }}"
         echo ""
-
-        # One approach to processing an array type field using bash:
-        array=($(echo "$plugins" | jq -r '.[]'))
-        for element in "${array[@]}"; do
+        
+        echo "One approach to processing an array type field using bash:"
+        for element in ${{ join(fromJSON(steps.maven-artifacts.outputs.update_json).plugins, ' ') }}; do
             IFS=":" read -r groupId artifactId version <<< "$element"
             echo "groupId: $groupId"
             echo "artifactId: $artifactId"
