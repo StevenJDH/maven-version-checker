@@ -17,6 +17,9 @@ Maven Version Checker is a GitHub action that checks for any available updates f
 * Produces outputs that can be used for additional processing.
 * Summary reports are generated after each run.
 * Supports being ran locally or from another third-party pipeline.
+* Implements standard resilience strategies like retry, circuit breaker, etc.
+* Implements chaos strategies to test the resiliency of the application during development.
+* Centralizes control of chaos strategies via the Chaos Manager.
 
 ## Compatibility
 Below is a list of GitHub-hosted runners that support jobs using this action.
@@ -38,7 +41,7 @@ The following inputs are available:
 The following outputs are available:
 
 | Name                                                                    | Type     | Example(s) | Description                                              |
-|-------------------------------------------------------------------------|----------|------------|----------------------------------------------------------|
+|-------------------------------------------------------------------------|----------|:----------:|----------------------------------------------------------|
 | <a name="has_updates"></a>[has_updates](#has_updates)                   | `string` | true       | Indicates whether or not artifact updates are available. |
 | <a name="number_of_updates"></a>[number_of_updates](#number_of_updates) | `string` | 5          | Holds the number of artifact updates available.          |
 | <a name="update_json"></a>[update_json](#update_json)                   | `string` | <code>{"parents"&#xFEFF;:&#xFEFF;["example:parent:2.0.0"], "dependencies"&#xFEFF;:&#xFEFF;["foo:bar:2.0.0"], "plugins"&#xFEFF;:&#xFEFF;["marco:polo:2.0.0"]}</code> | A map of artifacts with updates in json format. Note: The 'parents' field is maintained as an array so that processing can use the same code. |
@@ -83,6 +86,7 @@ jobs:
         echo "- [number_of_updates]: ${{ steps.maven-artifacts.outputs.number_of_updates }}"
         echo "- [update_json]: ${{ steps.maven-artifacts.outputs.update_json }}"
         echo ""
+        
         echo "Deserialized Update JSON:"
         echo "- [parents][0]: ${{ fromJSON(steps.maven-artifacts.outputs.update_json).parents[0] }}"
         echo "- [dependencies][0]: ${{ fromJSON(steps.maven-artifacts.outputs.update_json).dependencies[0] }}"
@@ -113,6 +117,9 @@ docker run --name maven-version-checker --workdir=/data --rm \
 ```
 
 If all goes well, there will be two generated files called `summary.txt` and `output.txt` that can be leveraged for further processing.
+
+## Enabling the chaos strategies
+To enable the chaos strategies, set an environment variable called `ASPNETCORE_ENVIRONMENT` to `Chaos` and restart the application. If using Visual Studio or another compatible IDE, select the `ChaosConsole (Multi)` profile before running the code. Supported chaos strategies include ConcurrencyLimiter, ChaosLatency, ChaosFault, and ChaosOutcome to test the standard resilience strategies being used and the business logic around it.
 
 ## Disclaimer
 Maven Version Checker is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
