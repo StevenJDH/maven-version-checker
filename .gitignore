@@ -8,6 +8,7 @@
 /*.licenseheader
 /*.wiki
 /[Ss]etups/
+/[Cc]overage[Rr]eport/
 
 # User-specific files
 *.rsuser
