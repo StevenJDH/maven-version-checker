@@ -44,7 +44,7 @@ The following outputs are available:
 |-------------------------------------------------------------------------|----------|:----------:|----------------------------------------------------------|
 | <a name="has_updates"></a>[has_updates](#has_updates)                   | `string` | true       | Indicates whether or not artifact updates are available. |
 | <a name="number_of_updates"></a>[number_of_updates](#number_of_updates) | `string` | 5          | Holds the number of artifact updates available.          |
-| <a name="update_json"></a>[update_json](#update_json)                   | `string` | <code>{"parents"&#xFEFF;:&#xFEFF;["example:parent:2.0.0"], "dependencies"&#xFEFF;:&#xFEFF;["foo:bar:2.0.0"], "plugins"&#xFEFF;:&#xFEFF;["marco:polo:2.0.0"]}</code> | A map of artifacts with updates in json format. Note: The 'parents' field is maintained as an array so that processing can use the same code. |
+| <a name="update_json"></a>[update_json](#update_json)                   | `json`   | {"parents"&#xFEFF;:&#xFEFF;["example:parent:2.0.0"], "dependencies"&#xFEFF;:&#xFEFF;["foo:bar:2.0.0"], "plugins"&#xFEFF;:&#xFEFF;["marco:polo:2.0.0"]} | A map of artifacts with updates in json format. Note: The 'parents' field is maintained as an array so that processing can use the same code. |
 
 ## Usage
 Implementing this action is relatively simple with just a few steps.
