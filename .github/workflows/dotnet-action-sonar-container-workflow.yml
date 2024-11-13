@@ -185,6 +185,7 @@ jobs:
         echo "- [number_of_updates]: ${{ steps.maven-artifacts.outputs.number_of_updates }}"
         echo "- [update_json]: ${{ steps.maven-artifacts.outputs.update_json }}"
         echo ""
+        
         echo "Deserialized Update JSON:"
         echo "- [parents][0]: ${{ fromJSON(steps.maven-artifacts.outputs.update_json).parents[0] }}"
         echo "- [dependencies][0]: ${{ fromJSON(steps.maven-artifacts.outputs.update_json).dependencies[0] }}"

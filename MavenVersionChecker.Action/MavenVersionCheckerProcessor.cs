@@ -30,7 +30,7 @@ using MavenVersionChecker.Action.Extensions;
 
 namespace MavenVersionChecker.Action;
 
-internal sealed class MavenVersionCheckerProcessor(ILogger<MavenVersionCheckerProcessor> logger,ActionInputs inputs,
+internal sealed class MavenVersionCheckerProcessor(ILogger<MavenVersionCheckerProcessor> logger, ActionInputs inputs,
     IMavenApiService service)
 {
     private readonly ILogger<MavenVersionCheckerProcessor> _logger = logger;
