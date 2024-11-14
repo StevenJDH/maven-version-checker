@@ -27,8 +27,11 @@ Below is a list of GitHub-hosted runners that support jobs using this action.
 | Runner     | Supported? | 
 |------------|:----------:|
 | [![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=flat&logo=ubuntu&logoColor=white)](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on) | ✅ |
-| [![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat\&logo=windows\&logoColor=white)](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on) | ❌ |
-| [![macOS](https://img.shields.io/badge/macOS-000000?style=flat\&logo=macos\&logoColor=F0F0F0)](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on) | ❌ |
+| [![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat\&logo=windows\&logoColor=white)](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on) | ⚠️ |
+| [![macOS](https://img.shields.io/badge/macOS-000000?style=flat\&logo=macos\&logoColor=F0F0F0)](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on) | ⚠️ |
+
+> [!NOTE]  
+> Windows and macOS is supported locally only.
 
 ## Inputs
 The following inputs are available:
@@ -103,7 +106,7 @@ jobs:
 ```
 
 ## Running locally or from another third-party pipeline
-Since this action is container-based, it can be ran locally or from another third-party pipeline using bash, for example, Azure Pipelines. First, create a [GitHub PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) with at least `read:packages` permissions from [here](https://github.com/settings/tokens/new?scopes=read:packages), and run the following commands from the root directory of a maven project:
+Since this action is container-based, it can be ran locally or from another third-party pipeline, for example, Azure Pipelines. First, create a [GitHub PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) with at least `read:packages` permissions from [here](https://github.com/settings/tokens/new?scopes=read:packages), and run the following commands from the root directory of a maven project:
 
 ```bash
 echo <YOUR_GITHUB_PAT> | docker login ghcr.io -u <YOUR_GITHUB_USERNAME> --password-stdin
@@ -116,7 +119,54 @@ docker run --name maven-version-checker --workdir=/data --rm \
   ghcr.io/stevenjdh/maven-version-checker:latest
 ```
 
-If all goes well, there will be two generated files called `summary.txt` and `output.txt` that can be leveraged for further processing.
+If all goes well, the `summary.txt` and `output.txt` files will be updated so that they can be leveraged for further processing.
+
+Alternatively, compile the code for the target OS using a matching [Runtime Identifier (RID)](https://learn.microsoft.com/en-us/dotnet/core/rid-catalog#known-rids), and run directly from the command line using the following:
+
+**Linux**
+
+```bash
+git clone https://github.com/StevenJDH/maven-version-checker.git
+cd maven-version-checker
+dotnet publish -r linux-x64 -c Release --property:PublishDir=./bin/Publish
+
+export INPUT_LOCATION="./pom.xml"
+export GITHUB_STEP_SUMMARY="./summary.txt"
+export GITHUB_OUTPUT="./output.txt"
+
+./MavenVersionChecker.Action
+```
+
+**Windows**
+
+```batch
+git clone https://github.com/StevenJDH/maven-version-checker.git
+cd maven-version-checker
+dotnet publish -r win-x64 -c Release --property:PublishDir=./bin/Publish
+
+set INPUT_LOCATION=./pom.xml
+set GITHUB_STEP_SUMMARY=./summary.txt
+set GITHUB_OUTPUT=./output.txt
+
+MavenVersionChecker.Action.exe
+```
+
+**macOS (Apple Silicon)**
+
+```bash
+git clone https://github.com/StevenJDH/maven-version-checker.git
+cd maven-version-checker
+dotnet publish -r osx-arm64 -c Release --property:PublishDir=./bin/Publish
+
+export INPUT_LOCATION="./pom.xml"
+export GITHUB_STEP_SUMMARY="./summary.txt"
+export GITHUB_OUTPUT="./output.txt"
+
+./MavenVersionChecker.Action
+```
+
+> [!IMPORTANT]  
+> When running locally, ensure that the `summary.txt` and `output.txt` files exist or are created before running the application. The [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) also needs to be installed in order to compile the code, which may be already included as part of the needed [Prerequisites](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/?tabs=windows%2Cnet8#prerequisites).
 
 ## Enabling the chaos strategies
 To enable the chaos strategies, set an environment variable called `ASPNETCORE_ENVIRONMENT` to `Chaos` and restart the application. If using Visual Studio or another compatible IDE, select the `ChaosConsole (Multi)` profile before running the code. Supported chaos strategies include ConcurrencyLimiter, ChaosLatency, ChaosFault, and ChaosOutcome to test the standard resilience strategies being used and the business logic around it.
