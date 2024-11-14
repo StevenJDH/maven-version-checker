@@ -18,6 +18,7 @@
 
 // Ignore Spelling: Api
 
+using System.Text.Json;
 using MavenVersionChecker.Action.Chaos;
 using MavenVersionChecker.Action.Data;
 using MavenVersionChecker.Action.Extensions;
@@ -182,6 +183,53 @@ public class ServiceCollectionExtensionsTests
         Assert.Multiple(() =>
         {
             Assert.That(messageHandlerBuilderFilter, Is.Null);
+        });
+    }
+
+    [Test, Description("Should use SourceGenerationContext for serializing and deserializing maven query response.")]
+    public void Should_UseSourceGenerationContext_ForSerializingAndDeserializingMavenQueryResponse()
+    {
+        var mavenQueryResponse = new MavenQueryResponse
+        {
+            Result = new QueryResult
+            {
+                NumberFound = 1,
+                Artifacts = [new Artifact { LatestVersion = "999.9.9" }]
+            }
+        };
+
+        string json = JsonSerializer.Serialize(mavenQueryResponse, SourceGenerationContext.Default.MavenQueryResponse);
+        var model = JsonSerializer.Deserialize<MavenQueryResponse>(json, SourceGenerationContext.Default.MavenQueryResponse);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(model, Is.Not.Null);
+            Assert.That(model!.Result.NumberFound, Is.EqualTo(1));
+            Assert.That(model!.Result.Artifacts, Has.Count.EqualTo(1));
+            Assert.That(model!.Result.Artifacts[0].LatestVersion, Is.EqualTo("999.9.9"));
+        });
+    }
+
+    [Test, Description("Should use SourceGenerationContext for serializing and deserializing dictionaries.")]
+    public void Should_UseSourceGenerationContext_ForSerializingAndDeserializingDictionaries()
+    {
+        const string expectedKey = "dependencies";
+        const string expectedValue = "foo:bar:2.0.0";
+        var dictionary = new Dictionary<string, List<string>>
+        {
+            { expectedKey, [expectedValue] }
+        };
+
+        string json = JsonSerializer.Serialize(dictionary, SourceGenerationContext.Default.DictionaryStringListString);
+        var model = JsonSerializer.Deserialize(json, SourceGenerationContext.Default.DictionaryStringListString);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(model, Is.Not.Null);
+            Assert.That(model, Has.Count.EqualTo(1));
+            Assert.That(model!, Contains.Key(expectedKey));
+            Assert.That(model!.GetValueOrDefault(expectedKey), Has.Count.EqualTo(1));
+            Assert.That(model!.GetValueOrDefault(expectedKey)![0], Is.EqualTo(expectedValue));
         });
     }
 }
