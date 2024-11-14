@@ -95,7 +95,7 @@ internal sealed class MavenVersionCheckerProcessor(ILogger<MavenVersionCheckerPr
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, ex.Message);
+            _logger.LogError(ex.Message);
             return ExitCode.Failure;
         }
 
