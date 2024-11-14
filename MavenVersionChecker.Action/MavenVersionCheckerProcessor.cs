@@ -157,7 +157,7 @@ internal sealed class MavenVersionCheckerProcessor(ILogger<MavenVersionCheckerPr
 
             rows.Add([artifactType.ToString(), $"{artifact.GroupId}:{artifact.ArtifactId}", artifact.Version, updateStatus]);
 
-            if (updateStatus.StartsWith(':'))
+            if (updateStatus is "✔️" or "🔴")
             {
                 continue;
             }
