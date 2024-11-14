@@ -18,7 +18,7 @@
 		<AssemblyVersion>1.0.0.24111</AssemblyVersion>
 		<FileVersion>1.0.0.24111</FileVersion>
 		<RepositoryUrl>https://github.com/StevenJDH/maven-version-checker</RepositoryUrl>
-		<NoWarn>CA2254;S1075;S6667</NoWarn>
+		<NoWarn>CA2254;S1075;S6667;IL3000</NoWarn>
 		<!--
 		Sets $(SolutionDir) when running from *.proj file instead of *.sln file so prebuild scripts
 		in Dockerfile work when running in GitHub workflow rather than getting undefined.
