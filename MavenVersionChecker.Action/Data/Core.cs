@@ -55,8 +55,7 @@ internal static class Core
     /// <exception cref="ArgumentNullException">When required input is not supplied.</exception>
     public static string GetInput(string name, InputOptions? options = default)
     {
-        var input = Environment.GetEnvironmentVariable($"INPUT_{name.Replace(' ', '_').ToUpperInvariant()}",
-            EnvironmentVariableTarget.Process);
+        var input = Environment.GetEnvironmentVariable($"INPUT_{name.Replace(' ', '_').ToUpperInvariant()}");
 
         return options switch
         {
@@ -107,7 +106,7 @@ internal static class Core
 
     private static async ValueTask IssueFileCommand(string commandSuffix, string content)
     {
-        string? filePath = Environment.GetEnvironmentVariable($"GITHUB_{commandSuffix}", EnvironmentVariableTarget.Process);
+        string? filePath = Environment.GetEnvironmentVariable($"GITHUB_{commandSuffix}");
 
         if (string.IsNullOrWhiteSpace(filePath))
         {
