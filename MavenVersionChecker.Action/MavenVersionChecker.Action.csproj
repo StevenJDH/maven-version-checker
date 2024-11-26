@@ -33,8 +33,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<!-- Version 9.0.0 of Microsoft.Extensions.Hosting creates Method not found: 'Void System.Text.Json.Serialization.Metadata.JsonObjectInfoValues issues. -->
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
-		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="8.10.0" />
+		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.0.0" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
 		<!-- Exposes internal classes to test project and Moq. -->
 		<InternalsVisibleTo Include="$(AssemblyName).Tests;DynamicProxyGenAssembly2" />
