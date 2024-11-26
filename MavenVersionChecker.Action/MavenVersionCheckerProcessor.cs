@@ -87,7 +87,7 @@ internal sealed class MavenVersionCheckerProcessor(ILogger<MavenVersionCheckerPr
 
             int updatesCount = _availableUpdates.Values.Sum(l => l.Count);
 
-            await SetStepSummaryAsync(summary.ToString().TrimEnd());
+            await SetStepSummaryAsync(summary.ToString());
             await SetOutputAsync("has_updates", (updatesCount > 0).ToString().ToLowerInvariant());
             await SetOutputAsync("number_of_updates", updatesCount.ToString());
             await SetOutputAsync("update_json", JsonSerializer.Serialize(_availableUpdates,

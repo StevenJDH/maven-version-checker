@@ -36,11 +36,10 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddGitHubActionServices(this IServiceCollection services)
     {
-        services.AddSingleton<ActionInputs>();
+        services.TryAddSingleton<ActionInputs>();
         services.TryAddSingleton<IChaosManager, ChaosManager>();
-        services.AddSingleton<MavenVersionCheckerProcessor>();
         
-        var httpClientBuilder = services.AddHttpClient("MavenApiClient", c =>
+        var httpClientBuilder = services.AddHttpClient("MavenApiClient", configureClient: static c =>
         {
             c.BaseAddress = new Uri("https://search.maven.org");
             c.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; rv:132.0) Gecko/20100101 Firefox/132.0");
@@ -56,26 +55,29 @@ public static class ServiceCollectionExtensions
                 {
                     EnabledGenerator = args => chaosManager.IsChaosEnabledAsync(args.Context),
                     InjectionRateGenerator = args => chaosManager.GetInjectionRateAsync(args.Context),
-                    Latency = TimeSpan.FromSeconds(5)
+                    Latency = TimeSpan.FromSeconds(15)
                 })
 
                 .AddChaosFault(new ChaosFaultStrategyOptions
                 {
                     EnabledGenerator = args => chaosManager.IsChaosEnabledAsync(args.Context),
                     InjectionRateGenerator = args => chaosManager.GetInjectionRateAsync(args.Context),
-                    FaultGenerator = new FaultGenerator().AddException(() => 
-                        new InvalidOperationException("Injected by chaos fault strategy!"))
+                    FaultGenerator = new FaultGenerator()
+                        .AddException(() => new HttpRequestException("Injected by chaos fault strategy!"), weight: 80)
+                        .AddException(() => new TimeoutException("It's another chaos fault strategy!"), weight: 20)
                 })
                 .AddChaosOutcome(new ChaosOutcomeStrategyOptions<HttpResponseMessage>
                 {
                     EnabledGenerator = args => chaosManager.IsChaosEnabledAsync(args.Context),
                     InjectionRateGenerator = args => chaosManager.GetInjectionRateAsync(args.Context),
-                    OutcomeGenerator = new OutcomeGenerator<HttpResponseMessage>().AddResult(() => 
-                        new HttpResponseMessage(HttpStatusCode.InternalServerError))
+                    OutcomeGenerator = new OutcomeGenerator<HttpResponseMessage>()
+                        .AddResult(() => new HttpResponseMessage(HttpStatusCode.InternalServerError), weight: 80)
+                        .AddResult(() => new HttpResponseMessage(HttpStatusCode.TooManyRequests), weight: 20)
                 });
         });
-
-        services.AddSingleton<IMavenApiService, MavenApiService>();
+        
+        services.TryAddSingleton<IMavenApiService, MavenApiService>();
+        services.TryAddSingleton<MavenVersionCheckerProcessor>();
 
         // Removes the noisy HttpClient info logs added when using the extension.
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();

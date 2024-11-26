@@ -31,7 +31,7 @@ public static class GitHubConsoleLoggerExtensions
         
         string env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "";
 
-        if (env.Equals("Development") || env.Equals("Chaos") )
+        if (env is "Development" or "Chaos")
         {
             builder.AddConsole();
             return builder;
