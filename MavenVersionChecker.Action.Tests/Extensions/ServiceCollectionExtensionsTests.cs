@@ -81,6 +81,7 @@ public class ServiceCollectionExtensionsTests
         const int expectedRateLimiterQueueLimit = 0;
         const int expectedRetryMaxRetryAttempts = 3;
         const DelayBackoffType expectedRetryBackoffType = DelayBackoffType.Exponential;
+        var expectedRetryDelay = TimeSpan.FromSeconds(2);
         var expectedCbBreakDuration = TimeSpan.FromSeconds(5);
         const double expectedCbFailureRatio = 0.1;
         var expectedCbSamplingDuration = TimeSpan.FromSeconds(30);
@@ -102,6 +103,7 @@ public class ServiceCollectionExtensionsTests
             Assert.That(options.Retry.UseJitter, Is.True);
             Assert.That(options.Retry.MaxRetryAttempts, Is.EqualTo(expectedRetryMaxRetryAttempts));
             Assert.That(options.Retry.BackoffType, Is.EqualTo(expectedRetryBackoffType));
+            Assert.That(options.Retry.Delay, Is.EqualTo(expectedRetryDelay));
             Assert.That(options.CircuitBreaker.BreakDuration, Is.EqualTo(expectedCbBreakDuration));
             Assert.That(options.CircuitBreaker.FailureRatio, Is.EqualTo(expectedCbFailureRatio));
             Assert.That(options.CircuitBreaker.SamplingDuration, Is.EqualTo(expectedCbSamplingDuration));
