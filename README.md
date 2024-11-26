@@ -129,10 +129,11 @@ Alternatively, compile the code for the target OS using a matching [Runtime Iden
 git clone https://github.com/StevenJDH/maven-version-checker.git
 cd maven-version-checker
 dotnet publish -r linux-x64 -c Release --property:PublishDir=./bin/Publish
+cd MavenVersionChecker.Action/bin/Publish
 
-export INPUT_LOCATION="./pom.xml"
-export GITHUB_STEP_SUMMARY="./summary.txt"
-export GITHUB_OUTPUT="./output.txt"
+export INPUT_LOCATION="./../../../MavenVersionChecker.Action.Tests/Sample/Multi/pom.xml"
+export GITHUB_STEP_SUMMARY="./Locals/summary.txt"
+export GITHUB_OUTPUT="./Locals/output.txt"
 
 ./MavenVersionChecker.Action
 ```
@@ -143,10 +144,11 @@ export GITHUB_OUTPUT="./output.txt"
 git clone https://github.com/StevenJDH/maven-version-checker.git
 cd maven-version-checker
 dotnet publish -r win-x64 -c Release --property:PublishDir=./bin/Publish
+cd MavenVersionChecker.Action\bin\Publish
 
-set INPUT_LOCATION=./pom.xml
-set GITHUB_STEP_SUMMARY=./summary.txt
-set GITHUB_OUTPUT=./output.txt
+set INPUT_LOCATION=./../../../MavenVersionChecker.Action.Tests/Sample/Multi/pom.xml
+set GITHUB_STEP_SUMMARY=./Locals/summary.txt
+set GITHUB_OUTPUT=./Locals/output.txt
 
 MavenVersionChecker.Action.exe
 ```
@@ -157,10 +159,11 @@ MavenVersionChecker.Action.exe
 git clone https://github.com/StevenJDH/maven-version-checker.git
 cd maven-version-checker
 dotnet publish -r osx-arm64 -c Release --property:PublishDir=./bin/Publish
+cd cd MavenVersionChecker.Action/bin/Publish
 
-export INPUT_LOCATION="./pom.xml"
-export GITHUB_STEP_SUMMARY="./summary.txt"
-export GITHUB_OUTPUT="./output.txt"
+export INPUT_LOCATION="./../../../MavenVersionChecker.Action.Tests/Sample/Multi/pom.xml"
+export GITHUB_STEP_SUMMARY="./Locals/summary.txt"
+export GITHUB_OUTPUT="./Locals/output.txt"
 
 ./MavenVersionChecker.Action
 ```
@@ -169,7 +172,13 @@ export GITHUB_OUTPUT="./output.txt"
 > When running locally, ensure that the `summary.txt` and `output.txt` files exist or are created before running the application. The [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) also needs to be installed in order to compile the code, which may be already included as part of the needed [Prerequisites](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/?tabs=windows%2Cnet8#prerequisites).
 
 ## Enabling the chaos strategies
-To enable the chaos strategies, set an environment variable called `ASPNETCORE_ENVIRONMENT` to `Chaos` and restart the application. If using Visual Studio or another compatible IDE, select the `ChaosConsole (Multi)` profile before running the code. Supported chaos strategies include ConcurrencyLimiter, ChaosLatency, ChaosFault, and ChaosOutcome to test the standard resilience strategies being used and the business logic around it.
+To enable the chaos strategies, set an environment variable called `ASPNETCORE_ENVIRONMENT` to `Chaos` and restart the application. If using Visual Studio or another compatible IDE, select the `ChaosConsole (Multi)` profile before running the code. Supported chaos strategies include ChaosFault, ChaosLatency, and ChaosOutcome to test the standard resilience strategies being used and the business logic around it. Below is a summary of their purposes.
+
+|Strategy | Type      | What does the strategy do?                                     |
+|:--------|:----------|:---------------------------------------------------------------|
+| Fault   | Proactive | Injects exceptions into the system.                            |
+| Latency | Proactive | Injects latency into executions before the calls are made.     |
+| Outcome | Reactive  |	Injects fake outcomes (results or exceptions) into the system. |
 
 ## Disclaimer
 Maven Version Checker is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
