@@ -18,8 +18,7 @@ Maven Version Checker is a GitHub action that checks for any available updates f
 * Summary reports are generated after each run.
 * Supports being ran locally or from another third-party pipeline.
 * Implements standard resilience strategies like retry, circuit breaker, etc.
-* Implements chaos strategies to test the resiliency of the application during development.
-* Centralizes control of chaos strategies via the Chaos Manager.
+* Implements chaos strategies to test the resiliency of the application.
 
 ## Compatibility
 Below is a list of GitHub-hosted runners that support jobs using this action.
@@ -121,7 +120,10 @@ docker run --name maven-version-checker --workdir=/data --rm \
 
 If all goes well, the `summary.txt` and `output.txt` files will be updated so that they can be leveraged for further processing.
 
-Alternatively, compile the code for the target OS using a matching [Runtime Identifier (RID)](https://learn.microsoft.com/en-us/dotnet/core/rid-catalog#known-rids), and run directly from the command line using the following:
+> [!IMPORTANT]  
+> When running outside of GitHub, ensure that the `summary.txt` and `output.txt` files exist or are created before running the application.
+
+Alternatively, compile the code for the target system using a matching [Runtime Identifier (RID)](https://learn.microsoft.com/en-us/dotnet/core/rid-catalog#known-rids) as in one of the command line examples below. The [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) also needs to be installed in order to compile the code, which may be already included as part of the needed AOT [Prerequisites](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/?tabs=windows%2Cnet8#prerequisites) for the target system.
 
 **Linux**
 
@@ -168,11 +170,8 @@ export GITHUB_OUTPUT="./Locals/output.txt"
 ./MavenVersionChecker.Action
 ```
 
-> [!IMPORTANT]  
-> When running locally, ensure that the `summary.txt` and `output.txt` files exist or are created before running the application. The [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) also needs to be installed in order to compile the code, which may be already included as part of the needed [Prerequisites](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/?tabs=windows%2Cnet8#prerequisites).
-
 ## Enabling the chaos strategies
-To enable the chaos strategies, set an environment variable called `ASPNETCORE_ENVIRONMENT` to `Chaos` and restart the application. If using Visual Studio or another compatible IDE, select the `ChaosConsole (Multi)` profile before running the code. Supported chaos strategies include ChaosFault, ChaosLatency, and ChaosOutcome to test the standard resilience strategies being used and the business logic around it. Below is a summary of their purposes.
+To enable the chaos strategies, set an environment variable called `ASPNETCORE_ENVIRONMENT` to `Chaos` and restart the application. If using Visual Studio or another compatible IDE, select the `ChaosConsole (Multi)` profile before running the code. The table below shows the supported chaos strategies being used to test the standard resilience strategies and the business logic around it.
 
 |Strategy | Type      | What does the strategy do?                                     |
 |:--------|:----------|:---------------------------------------------------------------|
