@@ -162,13 +162,15 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build${{ needs.build.outputs.mode == 'test' && ' and Tag ' || ', Tag, and Push ' }}Image
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: .
         file: MavenVersionChecker.Action/Dockerfile
         push: ${{ needs.build.outputs.mode == 'release' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+      env:
+        DOCKER_BUILD_SUMMARY: false
 
     - name: Test Action Locally
       if: ${{ needs.build.outputs.mode == 'test' }}
