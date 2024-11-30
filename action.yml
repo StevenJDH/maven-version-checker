@@ -37,7 +37,7 @@ outputs:
   number_of_updates:
     description: 'Holds the number of artifact updates available.'
   update_json:
-    description: 'A map of artifacts with updates in json format. Note: The parents field is maintained as an array so that processing can use the same code.'
+    description: 'A map of grouped artifacts with updates in json format. Note: The parents field is maintained as an array so that processing can use the same code.'
 
 runs:
   using: 'docker'

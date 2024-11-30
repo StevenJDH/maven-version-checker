@@ -30,7 +30,7 @@ Below is a list of GitHub-hosted runners that support jobs using this action.
 | [![macOS](https://img.shields.io/badge/macOS-000000?style=flat\&logo=macos\&logoColor=F0F0F0)](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on) | ⚠️ |
 
 > [!NOTE]  
-> Windows and macOS is supported locally only.
+> Windows and macOS is supported [locally](#locally) only.
 
 ## Inputs
 The following inputs are available:
@@ -46,7 +46,7 @@ The following outputs are available:
 |-------------------------------------------------------------------------|----------|:----------:|----------------------------------------------------------|
 | <a name="has_updates"></a>[has_updates](#has_updates)                   | `string` | true       | Indicates whether or not artifact updates are available. |
 | <a name="number_of_updates"></a>[number_of_updates](#number_of_updates) | `string` | 5          | Holds the number of artifact updates available.          |
-| <a name="update_json"></a>[update_json](#update_json)                   | `json`   | {"parents"&#xFEFF;:&#xFEFF;["example:parent:2.0.0"], "dependencies"&#xFEFF;:&#xFEFF;["foo:bar:2.0.0"], "plugins"&#xFEFF;:&#xFEFF;["marco:polo:2.0.0"]} | A map of artifacts with updates in json format. Note: The 'parents' field is maintained as an array so that processing can use the same code. |
+| <a name="update_json"></a>[update_json](#update_json)                   | `json`   | {"parents"&#xFEFF;:&#xFEFF;["example:parent:2.0.0"], "dependencies"&#xFEFF;:&#xFEFF;["foo:bar:2.0.0"], "plugins"&#xFEFF;:&#xFEFF;["marco:polo:2.0.0"]} | A map of grouped artifacts with updates in json format. Note: The `parents` field is maintained as an array so that processing can use the same code. |
 
 ## Usage
 Implementing this action is relatively simple with just a few steps.
@@ -104,11 +104,12 @@ jobs:
         done
 ```
 
-## Running locally or from another third-party pipeline
-Since this action is container-based, it can be ran locally or from another third-party pipeline, for example, Azure Pipelines. First, create a [GitHub PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) with at least `read:packages` permissions from [here](https://github.com/settings/tokens/new?scopes=read:packages), and run the following commands from the root directory of a maven project:
+## Running locally or from another third-party pipeline<a id='locally'></a>
+Since this action is container-based, it can be ran locally or from another third-party pipeline like Azure Pipelines. To get started, create a [GitHub PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) with at least `read:packages` permissions from [here](https://github.com/settings/tokens/new?scopes=read:packages), and run the following commands from the root directory of a maven project:
 
 ```bash
 echo <YOUR_GITHUB_PAT> | docker login ghcr.io -u <YOUR_GITHUB_USERNAME> --password-stdin
+touch summary.txt output.txt
 
 docker run --name maven-version-checker --workdir=/data --rm \
   -e INPUT_LOCATION="./pom.xml" \
