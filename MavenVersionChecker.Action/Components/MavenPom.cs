@@ -93,7 +93,7 @@ internal sealed class MavenPom(string location, Dictionary<string, string>? pare
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(propertyReference);
 
-        if (!propertyReference.Contains("$"))
+        if (!propertyReference.Contains('$'))
         {
             return propertyReference;
         }
